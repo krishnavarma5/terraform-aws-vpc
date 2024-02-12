@@ -62,7 +62,16 @@ resource "aws_subnet" "database" {
         Name = "${local.name}-database-${local.az_names[count.index]}"
     }
   )
-  }  
+  } 
+
+resource "aws_db_subnet_group" "default" {
+  name       = "${local.name}"
+  subnet_ids = aws_subnet.database[*].id
+
+  tags = {
+    Name = "${local.name}"
+  }
+}   
 
 resource "aws_eip" "eip" {
   domain           = "vpc"
@@ -138,6 +147,8 @@ resource "aws_route" "database_route" {
   destination_cidr_block    = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.main.id
 }
+
+
 
 resource "aws_route_table_association" "public" {
   count = length(var.public_subnets_cidr)
